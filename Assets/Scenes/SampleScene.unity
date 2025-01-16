@@ -151,7 +151,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b81c21917381384f948e445334177dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  axisLength: 3
+  axisLength: 2
+  originAxisLength: 4.7
   radius: 1
   rectStart: {x: 3.61, y: 8.46, z: 0}
   rectSize: {x: 15.63, y: 8, z: 0}
