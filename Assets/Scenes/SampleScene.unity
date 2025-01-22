@@ -154,9 +154,13 @@ MonoBehaviour:
   axisLength: 2
   originAxisLength: 4.7
   radius: 1
-  rectStart: {x: 3.61, y: 8.46, z: 0}
+  rectStart: {x: -24.94, y: 13.45, z: 0}
   rectSize: {x: 15.63, y: 8, z: 0}
   trackedTransform: {fileID: 1914833771}
+  popupWidthPercent: 0.6
+  popupHeightPercent: 0.35
+  screenSize: {x: 1920, y: 1080}
+  screenPos: {x: 3.5, y: 7.64}
 --- !u!4 &137548510
 Transform:
   m_ObjectHideFlags: 0

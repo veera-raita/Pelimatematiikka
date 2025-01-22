@@ -11,6 +11,12 @@ public class BasicMath : MonoBehaviour
     [SerializeField] private Transform trackedTransform;
     private Vector3 trackedPoint => trackedTransform.position;
 
+
+    [Range(0.01f, 1f)][SerializeField] private float popupWidthPercent = 0.6f;
+    [Range(0.01f, 1f)][SerializeField] private float popupHeightPercent = 0.35f;
+    [SerializeField] private Vector2 screenSize;
+    [SerializeField] private Vector2 screenPos;
+
     private void DrawVector(Vector3 _start, Vector3 _vec, Color _color, float _thickness)
     {
         float handleCapSize = 0.5f;
@@ -53,5 +59,16 @@ public class BasicMath : MonoBehaviour
         //draw rectangle
         DrawRect(rectStart, rectSize, Color.black);
         DrawAxes(rectStart, axisLength);
+
+        //moikka, voisitko laittaa ens kerralla tehtävänantoonkin, että tää oli tarkotus
+        //tehä "kehyksen" sisään, eikä oikean näytön koon mukaan... melkeen kuolin oikeesti :d
+        //draw fake "screen" frame
+        Vector2 screenDrawSize = screenSize * 0.01f;
+        DrawRect(screenPos, screenDrawSize, Color.black);
+
+        //draw popup
+        Vector2 popupSize = new(screenDrawSize.x * popupWidthPercent, screenDrawSize.y * popupHeightPercent);
+        Vector2 popupStart = new(screenPos.x + screenDrawSize.x * 0.5f - popupSize.x * 0.5f, screenPos.y + screenDrawSize.y * 0.5f - popupSize.y * 0.5f);
+        DrawRect(popupStart, popupSize, Color.red);
     }
 }
