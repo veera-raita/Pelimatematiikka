@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ public class BasicMath : MonoBehaviour
     [SerializeField] private Vector2 screenSize;
     [SerializeField] private Vector2 screenPos;
 
-    private void DrawVector(Vector3 _start, Vector3 _vec, Color _color, float _thickness)
+    public void DrawVector(Vector3 _start, Vector3 _vec, Color _color, float _thickness)
     {
         float handleCapSize = 0.5f;
         Handles.color = _color;
@@ -25,7 +26,7 @@ public class BasicMath : MonoBehaviour
         Handles.DrawLine(_start, _start + _vec, _thickness);
     }
 
-    private void DrawRect(Vector3 _rectStart, Vector3 _rectSize, Color _color)
+    public void DrawRect(Vector3 _rectStart, Vector3 _rectSize, Color _color)
     {
         Handles.color = _color;
         Handles.DrawLine(_rectStart, new Vector3(_rectStart.x + _rectSize.x, _rectStart.y), 3.0f);
@@ -34,7 +35,7 @@ public class BasicMath : MonoBehaviour
         Handles.DrawLine(new Vector3(_rectStart.x, _rectStart.y + _rectSize.y), new Vector3(_rectStart.x + _rectSize.x, _rectStart.y + _rectSize.y), 3.0f);
     }
 
-    private void DrawAxes(Vector3 _start, float _axisLength)
+    public void DrawAxes(Vector3 _start, float _axisLength)
     {
         //draw y-axis
         DrawVector(_start, Vector3.up * _axisLength, Color.green, 3.0f);
