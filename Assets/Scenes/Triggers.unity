@@ -265,7 +265,7 @@ Transform:
   m_GameObject: {fileID: 700991361}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.74, y: 0, z: 5.05}
+  m_LocalPosition: {x: -3.1, y: 0, z: 4.42}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -296,7 +296,7 @@ Transform:
   m_GameObject: {fileID: 971217783}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 14.9, y: 0, z: 10.31}
+  m_LocalPosition: {x: 16.52, y: 0, z: 10.13}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -311,7 +311,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1392384962}
-  - component: {fileID: 1392384960}
+  - component: {fileID: 1392384963}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -319,22 +319,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1392384960
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1392384959}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a597294857ea6b04a9711d8fe6b394a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  radius: 5
-  threshold: 45
-  lookTarget: {fileID: 700991362}
-  targetTransform: {fileID: 971217784}
 --- !u!4 &1392384962
 Transform:
   m_ObjectHideFlags: 0
@@ -351,6 +335,22 @@ Transform:
   - {fileID: 700991362}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1392384963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1392384959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a2dcedfc1470c247b81560d4ccbfb76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 5
+  threshold: 45
+  lookTarget: {fileID: 700991362}
+  targetTransform: {fileID: 971217784}
 --- !u!1 &1636563994
 GameObject:
   m_ObjectHideFlags: 0
