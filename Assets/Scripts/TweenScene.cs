@@ -7,7 +7,6 @@ using static EasingFunction;
 public class TweenScene : MonoBehaviour
 {
     [SerializeField] EasingFunction.Ease textFadeEase = EasingFunction.Ease.EaseInOutQuad;
-    [SerializeField] EasingFunction.Ease circleBounceEase = EasingFunction.Ease.EaseInOutQuad;
     [SerializeField] EasingFunction.Ease buttonRotateEase = EasingFunction.Ease.EaseInOutQuad;
     private const float fadeTime = 3f;
     private const float fastFadeTime = 1f;
