@@ -47,8 +47,8 @@ public class WedgeTrigger : MonoBehaviour
         Vector3 rangeRight = rotate * lookVectorNormalized;
         rotate = Quaternion.Euler(0, -threshold, 0);
         Vector3 rangeLeft = rotate * lookVectorNormalized;
-        Vector3 offsetTriggerPosDown = new(vecTriggerPos.x, vecTriggerPos.y - wedgeHeight * 0.5f, vecTriggerPos.z);
-        Vector3 offsetTriggerPosUp = new(vecTriggerPos.x, vecTriggerPos.y + wedgeHeight * 0.5f, vecTriggerPos.z);
+        Vector3 offsetTriggerPosDown = new(vecTriggerPos.x, vecTriggerPos.y - wedgeHeight, vecTriggerPos.z);
+        Vector3 offsetTriggerPosUp = new(vecTriggerPos.x, vecTriggerPos.y + wedgeHeight, vecTriggerPos.z);
 
         //actually drawing the wedge: first three lines draw one slice, second three draw second slice higher up
         Handles.DrawLine(offsetTriggerPosDown, offsetTriggerPosDown + rangeRight * radius, 3.0f);
