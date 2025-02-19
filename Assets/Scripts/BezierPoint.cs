@@ -8,11 +8,42 @@ public class BezierPoint : MonoBehaviour
     [SerializeField] private Transform controlBTransform;
     public Vector3 controlA => controlATransform.position;
     public Vector3 controlB => controlBTransform.position;
-
     [SerializeField] private bool DrawOn = true;
+
+
+    //these two should probably be generalized into the same method
+    private void FixBPosition()
+    {
+        float bLength = Vector3.Distance(Vector3.zero, controlBTransform.localPosition);
+        Vector3 newBPos = controlATransform.localPosition.normalized;
+        Quaternion rotation = Quaternion.Euler(0, 180, 0);
+        newBPos = bLength * (rotation * newBPos);
+        controlBTransform.localPosition = newBPos;
+    }
+
+    private void FixAPosition()
+    {
+        float aLength = Vector3.Distance(Vector3.zero, controlATransform.localPosition);
+        Vector3 newAPos = controlBTransform.localPosition.normalized;
+        Quaternion rotation = Quaternion.Euler(0, 180, 0);
+        newAPos = aLength * (rotation * newAPos);
+        controlATransform.localPosition = newAPos;
+    }
 
     private void OnDrawGizmos()
     {
+        if (controlATransform.hasChanged)
+        {
+            FixBPosition();
+            controlATransform.hasChanged = false;
+        }
+        else if (controlBTransform.hasChanged)
+        {
+            FixAPosition();
+            controlBTransform.hasChanged = false;
+        }
+
+
         if (!DrawOn) return;
 
         Gizmos.color = Color.red;
