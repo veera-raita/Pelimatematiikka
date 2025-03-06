@@ -16,8 +16,7 @@ public class BezierPoint : MonoBehaviour
     {
         float bLength = Vector3.Distance(Vector3.zero, controlBTransform.localPosition);
         Vector3 newBPos = controlATransform.localPosition.normalized;
-        Quaternion rotation = Quaternion.Euler(0, 180, 0);
-        newBPos = bLength * (rotation * newBPos);
+        newBPos = bLength * - newBPos;
         controlBTransform.localPosition = newBPos;
     }
 
@@ -25,8 +24,7 @@ public class BezierPoint : MonoBehaviour
     {
         float aLength = Vector3.Distance(Vector3.zero, controlATransform.localPosition);
         Vector3 newAPos = controlBTransform.localPosition.normalized;
-        Quaternion rotation = Quaternion.Euler(0, 180, 0);
-        newAPos = aLength * (rotation * newAPos);
+        newAPos = aLength * -newAPos;
         controlATransform.localPosition = newAPos;
     }
 

@@ -23,12 +23,17 @@ public class SimpleMesh : MonoBehaviour
         Mesh mesh = new();
         Vector3[] vertices = new Vector3[4];
         int[] triangles = new int[6];
+        Vector2[] uvPoints = new Vector2[4];
 
         //init vertices
         vertices[0] = new(0, 0, 0);
         vertices[1] = new(1, 0, 0);
         vertices[2] = new(0, 0, 1);
         vertices[3] = new(1, 0, 1);
+        uvPoints[0] = new(0, 0);
+        uvPoints[1] = new(1, 0);
+        uvPoints[2] = new(0, 1);
+        uvPoints[3] = new(1, 1);
 
         //init triangles
         triangles[0] = 0;
@@ -42,6 +47,7 @@ public class SimpleMesh : MonoBehaviour
         mesh.vertices = vertices;
         //set triangles
         mesh.triangles = triangles;
+        mesh.uv = uvPoints;
 
         mesh.RecalculateNormals();
 
@@ -53,8 +59,11 @@ public class SimpleMesh : MonoBehaviour
         Mesh mesh = new();
         List<Vector3> vertices = new();
         List<int> triangles = new();
+        List<Vector2> uvPoints = new();
+        float uvScaler = 1 / (radius + thickness);
 
         vertices.Add(Vector3.zero);
+        uvPoints.Add(new Vector2(0.5f, 0.5f));
 
         float deltaAngle = 360f / segmentCount;
 
@@ -65,6 +74,8 @@ public class SimpleMesh : MonoBehaviour
             float z = Mathf.Sin(angle) * (radius + thickness);
             // Add the vertex into a suitable data structure (array, list)
             vertices.Add(new Vector3(x, 0, z));
+
+            uvPoints.Add((new Vector2(1, 1) + (new Vector2(x, z) * uvScaler)) / 2f);
         }
 
         for (int i = 0; i < segmentCount - 1; i++)
@@ -81,6 +92,7 @@ public class SimpleMesh : MonoBehaviour
 
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles, 0);
+        mesh.SetUVs(0, uvPoints);
         mesh.RecalculateNormals();
 
         return mesh;
