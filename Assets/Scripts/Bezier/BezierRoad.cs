@@ -161,6 +161,8 @@ public class BezierRoad : MonoBehaviour
                         Handles.DrawLine(pointToDraw, (Vector3)previousSegment[k], 1.5f);
                     }
 
+                    //clumsy way of connecting the first and last pieces without using
+                    //an additional Vector3 array to hold the points
                     if (k + 2 == roadCrossSection.vertices.Length)
                     {
                         pointToDraw = roadCrossSection.vertices[k + 1].point.x * _right +
