@@ -112,12 +112,22 @@ public class BezierRoad : MonoBehaviour
         Vector3 realUp = Vector3.Cross(forwardVector, right);
         MyDraw.DrawVectorAt(curvePoint.position, realUp * 3.0f, Color.green, 3.0f);
 
-        Gizmos.color = Color.red;
+        Handles.color = Color.yellow;
+
+        
+        if (roadCrossSection == null) return;
 
         for (int i = 0; i < segments; i++)
         {
             int sectionsPerSegment = drawnSegmentCount / segments;
-            for (int j = 0; j < sectionsPerSegment; j++)
+            Vector3?[] previousSegment = new Vector3?[roadCrossSection.vertices.Length];
+            
+            for(int j = 0 ; j < previousSegment.Length; j++)
+            {
+                previousSegment[j] = null;
+            }
+
+            for (int j = 0; j <= sectionsPerSegment; j++)
             {
                 float _t = (float)j / (float)sectionsPerSegment;
                 Vector3 trackCenter = GetBezierPoint(i, _t);
@@ -132,14 +142,37 @@ public class BezierRoad : MonoBehaviour
                 Vector3 _realUp = Vector3.Cross(_forwardVector, _right);
 
                 //draw points using cross section
-                if (roadCrossSection != null)
-                    foreach (Mesh2D.Vertex vertex in roadCrossSection.vertices)
+                for (int k = 0; k < roadCrossSection.vertices.Length - 1; k++)
+                {
+                    //these are this road crossection's points
+                    Vector3 pointToDraw = roadCrossSection.vertices[k].point.x * _right +
+                    roadCrossSection.vertices[k].point.y * _realUp;
+                    Vector3 nextPointToDraw = roadCrossSection.vertices[k + 1].point.x * _right +
+                    roadCrossSection.vertices[k + 1].point.y * _realUp;
+
+                    //these are for drawing this segment
+                    pointToDraw += trackCenter;
+                    nextPointToDraw += trackCenter;
+
+                    //draw lines
+                    Handles.DrawLine(pointToDraw, nextPointToDraw, 1.5f);
+                    if (previousSegment[k] != null)
                     {
-                        //2D-point x-coodrinate times right-vector + y-coord times realUp-vector
-                        Vector3 pointToDraw = vertex.point.x * _right + vertex.point.y * _realUp;
-                        pointToDraw += trackCenter;
-                        Gizmos.DrawSphere(pointToDraw, 0.2f);
+                        Handles.DrawLine(pointToDraw, (Vector3)previousSegment[k], 1.5f);
                     }
+
+                    if (k + 2 == roadCrossSection.vertices.Length)
+                    {
+                        pointToDraw = roadCrossSection.vertices[k + 1].point.x * _right +
+                        roadCrossSection.vertices[k + 1].point.y * _realUp;
+                        nextPointToDraw = roadCrossSection.vertices[0].point.x * _right +
+                        roadCrossSection.vertices[0].point.y * _realUp;
+                        pointToDraw += trackCenter;
+                        nextPointToDraw += trackCenter;
+                        Handles.DrawLine(pointToDraw, nextPointToDraw, 1.5f);
+                    }
+                    previousSegment[k] = pointToDraw;
+                }
             }
         }
     }
