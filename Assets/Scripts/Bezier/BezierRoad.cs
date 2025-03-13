@@ -1,21 +1,25 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 public class BezierRoad : MonoBehaviour
 {
-    //t values
     [Range(0.0f, 1.0f)][SerializeField] private float t;
     [Range(10, 200)][SerializeField] private int drawnSegmentCount = 50;
+    [Range(0.1f, 5.0f)][SerializeField] private float roadScaler = 1f;
 
     float adjustedT => AdjustTValue(GetSegment());
 
+    //road stuff
     [SerializeField] Mesh2D roadCrossSection;
+    private Mesh roadMesh;
 
     //bezier points and t visualizer
     [SerializeField] private BezierPoint[] points;
     [SerializeField] private Transform curvePoint;
     private int segments => closedPath ? points.Length : points.Length - 1;
     [SerializeField] bool closedPath = false;
+
 
     private int GetSegment()
     {
@@ -78,9 +82,136 @@ public class BezierRoad : MonoBehaviour
         return (lerp2334 - lerp1223).normalized;
     }
 
+    private Mesh GenerateRoadMesh(Mesh _currentMesh)
+    {
+        if (roadCrossSection == null) return null;
+
+        Mesh _roadMesh;
+        
+        if (_currentMesh != null)
+        {
+            _currentMesh.Clear();
+            _roadMesh = _currentMesh;
+        }
+        else
+        {
+            _roadMesh = new();
+        }
+
+        List<Vector3> vertices = new();
+        List<int> triangles = new();
+
+        for (int i = 0; i < segments; i++)
+        {
+            int sectionsPerSegment = drawnSegmentCount / segments;
+            Vector3?[] previousSegment = new Vector3?[roadCrossSection.vertices.Length];
+            
+            for(int j = 0 ; j < previousSegment.Length; j++)
+            {
+                previousSegment[j] = null;
+            }
+
+            for (int j = 0; j < sectionsPerSegment; j++)
+            {
+                float _t = (float)j / (float)sectionsPerSegment;
+                Vector3 trackCenter = GetBezierPoint(i, _t);
+
+                //get forward vector
+                Vector3 _forwardVector = GetBezierForwardVector(i, _t);
+
+                //get "right" vector
+                Vector3 _right = Vector3.Cross(Vector3.up, _forwardVector);
+
+                //get "real up" vector
+                Vector3 _realUp = Vector3.Cross(_forwardVector, _right);
+
+                //draw points using cross section
+                for (int k = 0; k < roadCrossSection.vertices.Length; k++)
+                {
+                    //these are this road crossection's points
+                    Vector3 vert = roadCrossSection.vertices[k].point.x * _right +
+                    roadCrossSection.vertices[k].point.y * _realUp;
+
+                    //scale road crosssection
+                    vert *= roadScaler;
+
+                    //actual corrected point
+                    vert += trackCenter;
+
+                    Gizmos.DrawSphere(vert, 0.2f);
+
+                    vertices.Add(vert);
+
+                    //clumsy way of connecting the first and last pieces without using
+                    //an additional Vector3 array to hold the points
+                    // if (k + 2 == roadCrossSection.vertices.Length)
+                    // {
+                    //     vert = roadCrossSection.vertices[^1].point.x * _right +
+                    //     roadCrossSection.vertices[^1].point.y * _realUp;
+                        
+                    //     vert *= roadScaler;
+                    //     vert += trackCenter;
+                    // }
+                    previousSegment[k] = vert;
+                }
+            }
+        }
+
+        //USE MORE FOR LOOPS
+        for (int i = 0; i < drawnSegmentCount - 1; i++)
+        {
+            int indexOffset = i * roadCrossSection.vertices.Length;
+
+            int lowerLeft, lowerRight, upperLeft, upperRight;
+
+            for (int j = 1; j < roadCrossSection.vertices.Length - 1; j += 2)
+            {
+                lowerLeft = j + indexOffset;
+                lowerRight = lowerLeft + 1;
+                upperLeft = lowerLeft + roadCrossSection.vertices.Length;
+                upperRight = upperLeft + 1;
+
+                //first triangle
+                triangles.Add(lowerLeft);
+                triangles.Add(upperLeft);
+                triangles.Add(upperRight);
+
+                //second triangle
+                triangles.Add(lowerLeft);
+                triangles.Add(upperRight);
+                triangles.Add(lowerRight);
+            }
+
+            lowerLeft = indexOffset + roadCrossSection.vertices.Length - 1;
+            lowerRight = indexOffset;
+            upperLeft = lowerLeft + roadCrossSection.vertices.Length;
+            upperRight = lowerRight + roadCrossSection.vertices.Length;
+
+            triangles.Add(lowerLeft);
+            triangles.Add(upperLeft);
+            triangles.Add(upperRight);
+
+            //second triangle
+            triangles.Add(lowerLeft);
+            triangles.Add(upperRight);
+            triangles.Add(lowerRight);
+        }
+
+        _roadMesh.SetVertices(vertices);
+        _roadMesh.SetTriangles(triangles, 0);
+        _roadMesh.RecalculateNormals();
+
+        return _roadMesh;
+        //returning here
+    }
+
     private void OnDrawGizmos()
     {
         if (points.Length < 2) return;
+
+        roadMesh = GenerateRoadMesh(roadMesh);
+        roadMesh.name = "generated road mesh";
+        GetComponent<MeshFilter>().sharedMesh = roadMesh;
 
         for (int i = 0; i < segments; i++)
         {
@@ -150,6 +281,10 @@ public class BezierRoad : MonoBehaviour
                     Vector3 nextPointToDraw = roadCrossSection.vertices[k + 1].point.x * _right +
                     roadCrossSection.vertices[k + 1].point.y * _realUp;
 
+                    //scale road crosssection
+                    pointToDraw *= roadScaler;
+                    nextPointToDraw *= roadScaler;
+
                     //these are for drawing this segment
                     pointToDraw += trackCenter;
                     nextPointToDraw += trackCenter;
@@ -165,10 +300,13 @@ public class BezierRoad : MonoBehaviour
                     //an additional Vector3 array to hold the points
                     if (k + 2 == roadCrossSection.vertices.Length)
                     {
-                        pointToDraw = roadCrossSection.vertices[k + 1].point.x * _right +
-                        roadCrossSection.vertices[k + 1].point.y * _realUp;
+                        pointToDraw = roadCrossSection.vertices[^1].point.x * _right +
+                        roadCrossSection.vertices[^1].point.y * _realUp;
                         nextPointToDraw = roadCrossSection.vertices[0].point.x * _right +
                         roadCrossSection.vertices[0].point.y * _realUp;
+                        
+                        pointToDraw *= roadScaler;
+                        nextPointToDraw *= roadScaler;
                         pointToDraw += trackCenter;
                         nextPointToDraw += trackCenter;
                         Handles.DrawLine(pointToDraw, nextPointToDraw, 1.5f);
