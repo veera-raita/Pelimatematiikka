@@ -15,31 +15,31 @@ MonoBehaviour:
   vertices:
   - point: {x: 3, y: 0}
     normal: {x: 0, y: 0}
-    u: 0
+    u: 0.7142857
   - point: {x: 3, y: 0}
     normal: {x: -0.7071, y: 0.7071}
-    u: 0
+    u: 0.71428573
   - point: {x: 5, y: 1}
     normal: {x: -0.7071, y: 0.7071}
-    u: 0
+    u: 0.8571429
   - point: {x: 5, y: 1}
     normal: {x: 0, y: 1}
-    u: 0
+    u: 0.85714287
   - point: {x: 7, y: 1}
     normal: {x: 0, y: 1}
-    u: 0
+    u: 1
   - point: {x: 7, y: 1}
     normal: {x: 1, y: 0}
-    u: 0
+    u: 1
   - point: {x: 7, y: -1}
     normal: {x: 1, y: 0}
-    u: 0
+    u: 1
   - point: {x: 7, y: -1}
     normal: {x: 0, y: -1}
-    u: 0
+    u: 1
   - point: {x: -7, y: -1}
     normal: {x: 0, y: -1}
-    u: 0
+    u: 1
   - point: {x: -7, y: -1}
     normal: {x: -1, y: 0}
     u: 0
@@ -51,14 +51,14 @@ MonoBehaviour:
     u: 0
   - point: {x: -5, y: 1}
     normal: {x: 0, y: 1}
-    u: 0
+    u: 0.14285715
   - point: {x: -5, y: 1}
     normal: {x: 0.7071, y: 0.7071}
-    u: 0
+    u: 0.1428571
   - point: {x: -3, y: 0}
     normal: {x: 0.7071, y: 0.85}
-    u: 0
+    u: 0.2857143
   - point: {x: -3, y: 0}
     normal: {x: 0, y: 1}
-    u: 0
+    u: 0.2857143
   lineIndices: 0d000000000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c000000
