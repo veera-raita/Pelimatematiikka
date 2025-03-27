@@ -105,6 +105,8 @@ public class BezierRoad : MonoBehaviour
         List<Vector2> uvs = new();
         List<int> triangles = new();
 
+        float debugT = -1;
+
         for (int i = 0; i <= drawnSegmentCount; i++)
         {
             // int sectionsPerSegment = drawnSegmentCount / segments;
@@ -120,8 +122,16 @@ public class BezierRoad : MonoBehaviour
             float adjustedT = (_t - ((float)currentSegment / (float)segments)) / (1.0f / (float)segments);
             float v = (uvT - ((float)currentSegment / (float)segments)) / (1.0f / (float)segments);
             if (v > 1f) v = 1f;
-            Debug.Log($"i {i} adjustedT {adjustedT} v {v}");
+            float scalar = 1 - (float)segments / (float)drawnSegmentCount;
+            if (currentSegment % 2 == 1) v = 1 - v;
+            v *= scalar;
+
             Vector3 trackCenter = GetBezierPoint(currentSegment, adjustedT);
+            
+            if (i + 1 >= drawnSegmentCount)
+            {
+                Debug.Log($"uvT {v}");
+            }
 
             //get forward vector
             Vector3 _forwardVector = GetBezierForwardVector(currentSegment, adjustedT);
@@ -151,6 +161,7 @@ public class BezierRoad : MonoBehaviour
                 uvs.Add(new Vector2(roadCrossSection.vertices[j].u, v));
                 normals.Add((Vector3)roadCrossSection.vertices[j].normal * roadScaler + trackCenter);
             }
+            debugT = v;
         }
 
         int baseIndex;

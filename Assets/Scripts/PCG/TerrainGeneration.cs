@@ -2,149 +2,127 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(MeshFilter))]
+[RequireComponent(typeof(MeshRenderer))]
 public class TerrainGeneration : MonoBehaviour
 {
+    [SerializeField] private NoiseSettings[] noiseSettings;
+
+    [Range(1f, 10000f)] public float size = 1000.0f;
+    [Range(-100f, 100f)] public float xOffset = 0f;
+    [Range(-100f, 100f)] public float yOffset = 0f;
+
+    [Range(10, 255)] public int segments = 100;
+
+    [Range (0.1f, 100f)] public float heightScaler = 10.0f;
+
+    [Range(0.001f, 1f)] public float frequencyScaler = 1.0f;
+
+    public bool useThresholding = false;
+
     private Mesh mesh;
-    [SerializeField] private int meshScale = 500;
-    [SerializeField] private AnimationCurve heightCurve;
-    private Vector3[] vertices;
-    private int[] triangles;
 
-    [SerializeField] private int xSize;
-    [SerializeField] private int zSize;
-
-    [SerializeField] private float amplitude = 6;
-    [SerializeField] private float scale; 
-    [Range (0, 3)] [SerializeField] private int octaves;
-    [SerializeField] private float lacunarity;
-
-    [SerializeField] private int seed;
-    private System.Random prng;
-    private Vector2[] octaveOffsets;
-
-    private float timer = 0f;
-    private float updateFrequency = 0.3f;
-
-    private void Start()
+    private void OnDrawGizmos()
     {
-        // Creates seed
-        octaveOffsets = GetOffsetSeed();
-        mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;
-        CreateNewMap();
-    }
+        GenerateMesh();
 
-    void Update()
-    {
-        timer += Time.deltaTime;
-        if (timer < updateFrequency) return;
-        timer = 0f;
+        float delta = size / (segments - 1);
 
-        mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;
-        CreateNewMap();
-    }
-
-    public void CreateNewMap()
-    {
-        CreateMeshShape();
-        CreateTriangles();
-        UpdateMesh();
-    }
-
-    private void CreateMeshShape ()
-    {
-        if (scale <= 0) scale = 0.0001f;
-            
-        // Create vertices array
-        vertices = new Vector3[(xSize + 1) * (zSize + 1)];
-
-        for (int i = 0, z = 0; z <= zSize; z++)
+        for (int i = 0; i < segments; i++)
         {
-            for (int x = 0; x <= xSize; x++)
+            for (int j = 0; j < segments; j++)
             {
-                // Assign and set height of each vertices
-                float noiseHeight = GenerateNoiseHeight(z, x, octaveOffsets);
-                vertices[i] = new Vector3(x, noiseHeight, z);
-                i++;
+                float x = i * delta;
+                float y = j * delta;
+
+                Gizmos.color = Color.green;
+                //Gizmos.DrawSphere(new Vector3(x, 0, y), .5f);
             }
         }
     }
 
-    private Vector2[] GetOffsetSeed()
+    void GenerateMesh()
     {
-        seed = Random.Range(0, 1000);
-        // changes area of map
-        System.Random prng = new System.Random(seed);
-        Vector2[] octaveOffsets = new Vector2[octaves];
-                    
-        for (int o = 0; o < octaves; o++) {
-            float offsetX = prng.Next(-100000, 100000);
-            float offsetY = prng.Next(-100000, 100000);
-            octaveOffsets[o] = new Vector2(offsetX, offsetY);
-        }
-        return octaveOffsets;
-    }
-
-    private float GenerateNoiseHeight(int z, int x, Vector2[] octaveOffsets)
-    {
-        float amp = amplitude;
-        float frequency = 1;
-        float persistence = 0.5f;
-        float noiseHeight = 0;
-
-        // loop over octaves
-        for (int y = 0; y < octaves; y++)
+        if (mesh == null)
         {
-            float mapZ = z / scale * frequency + octaveOffsets[y].y;
-            float mapX = x / scale * frequency + octaveOffsets[y].x;
-
-            // Create perlinValues  
-            // The *2-1 is to create a flat floor level
-            float perlinValue = (Mathf.PerlinNoise(mapZ, mapX)) * 2 - 1;
-            noiseHeight += heightCurve.Evaluate(perlinValue) * amp;
-            frequency *= lacunarity;
-            amp *= persistence;
+            mesh = new Mesh();
+            mesh.name = "Terrain Mesh";
         }
-        return noiseHeight;
-    }
-
-    private void CreateTriangles() 
-    {
-        // Need 6 vertices to create a square (2 triangles)
-        triangles = new int[xSize * zSize * 6];
-        int vert = 0;
-        int tris = 0;
-
-        // loop through rows
-        for (int z = 0; z < zSize; z++)
+        else
         {
-            // fill all columns in row
-            for (int x = 0; x < xSize; x++)
+            mesh.Clear();
+        }
+
+        List<Vector3> vertices = new List<Vector3>();
+        List<Vector3> uvs = new List<Vector3>();
+        List<int> tris = new List<int>();
+
+        float delta = size / (segments - 1);
+
+        // Generate vertices
+        for (int i = 0; i < segments; i++)
+        {
+            for (int j = 0; j < segments; j++)
             {
-                triangles[tris] = vert + 0;
-                triangles[tris + 1] = vert + xSize + 1;
-                triangles[tris + 2] = vert + 1;
-                triangles[tris + 3] = vert + 1;
-                triangles[tris + 4] = vert + xSize + 1;
-                triangles[tris + 5] = vert + xSize + 2;
+                float x = i * delta;
+                float y = j * delta;
 
-                vert++;
-                tris += 6;
+                // Use Perlin Noise
+                float noiseValue = 0f;
+                for (int k = 0; k < noiseSettings.Length; k++)
+                {
+                    noiseValue += noiseSettings[k].amplitude * (Mathf.PerlinNoise(noiseSettings[k].frequency * (x + xOffset),
+                                                                                  noiseSettings[k].frequency * (y + yOffset)) - 0.5f);
+                }
+                //Debug.Log(noisevalue);
+                if (useThresholding)
+                {
+                    if (noiseValue < 0.0f)
+                    {
+                        noiseValue = 0.0f;
+                    }
+                }
+                float height = heightScaler * noiseValue;
+                // Add the vertex
+                vertices.Add(new Vector3(x,height, y));
+                uvs.Add(new Vector2(x + xOffset, y + yOffset) / size);
             }
-            vert++;
         }
-    }
 
-    private void UpdateMesh()
-    {
-        mesh.Clear();
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
+        // Generate triangles
+        for (int i = 0; i < segments-1; i++)
+        {
+            for (int j = 0;j < segments-1; j++)
+            {
+                // "Upper left"
+                int ul = j * segments + i;
+
+                // "Upper right"
+                int ur = ul + 1;
+
+                // "Lower left"
+                int ll = ul + segments;
+
+                // "Lower right"
+                int lr = ll + 1;
+
+                // Triangles:
+                tris.Add(ll);
+                tris.Add(ul);
+                tris.Add(ur);
+
+                tris.Add(ll);
+                tris.Add(ur);
+                tris.Add(lr);
+            }
+        }
+
+
+        mesh.SetVertices(vertices);
+        mesh.SetTriangles(tris, 0);
+        mesh.SetUVs(0, uvs);
         mesh.RecalculateNormals();
-        mesh.RecalculateTangents();
-        GetComponent<MeshCollider>().sharedMesh = mesh;
 
-        gameObject.transform.localScale = new Vector3(meshScale, meshScale, meshScale);
+        GetComponent<MeshFilter>().sharedMesh = mesh;
     }
 }
