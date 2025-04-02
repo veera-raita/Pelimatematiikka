@@ -2,6 +2,10 @@ Shader "Unlit/HeightShader"
 {
     Properties
     {
+        _PlainTex ("Plains Texture", 2D) = "white" {}
+        _MountainTex ("Mountain Texture", 2D) = "white" {}
+        _SnowTex ("Snow Texture", 2D) = "white" {}
+        _WaterTex ("Water Texture", 2D) = "white" {}
         _MainTex ("Texture", 2D) = "white" {}
         _SnowHeight ("Snow Height", Range(0.0, 100.0)) = 20.0
         _MountainHeight ("Mountain Height", Range(0.0, 100.0)) = 10.0
@@ -38,6 +42,11 @@ Shader "Unlit/HeightShader"
                 float height : TEXCOORD1;
             };
 
+            sampler2D _PlainTex;
+            sampler2D _MountainTex;
+            sampler2D _SnowTex;
+            sampler2D _WaterTex;
+            sampler2D _FlowTex;
             sampler2D _MainTex;
             float4 _MainTex_ST;
             float _SnowHeight;
@@ -68,10 +77,16 @@ Shader "Unlit/HeightShader"
             {
                 float t = 0.0;
                 fixed4 col;
-                fixed4 col_water = fixed4(0.1, 0.1, 0.8, 1.0);
-                fixed4 col_plains = fixed4(0.5, 0.5, 0.0, 1.0);
-                fixed4 col_mountain = fixed4(0.2, 0.2, 0.3, 1.0);
-                fixed4 col_snow = fixed4(1.0, 1.0, 1.0, 1.0);
+                // fixed4 col_water = fixed4(0.1, 0.1, 0.8, 1.0);
+                // fixed4 col_plains = fixed4(0.5, 0.5, 0.0, 1.0);
+                // fixed4 col_mountain = fixed4(0.2, 0.2, 0.3, 1.0);
+                // fixed4 col_snow = fixed4(1.0, 1.0, 1.0, 1.0);
+
+                // sample the texture
+                fixed4 col_water = tex2D(_WaterTex, i.uv);
+                fixed4 col_plains = tex2D(_PlainTex, i.uv);
+                fixed4 col_mountain = tex2D(_MountainTex, i.uv);
+                fixed4 col_snow = tex2D(_SnowTex, i.uv);
 
                 ////////////////////////////
                 // homework: ADD TEXTURES //
