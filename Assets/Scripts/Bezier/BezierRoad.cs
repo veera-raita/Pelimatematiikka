@@ -8,8 +8,12 @@ public class BezierRoad : MonoBehaviour
     [Range(0.0f, 1.0f)][SerializeField] private float t;
     [Range(10, 200)][SerializeField] private int drawnSegmentCount = 50;
     [Range(0.1f, 5.0f)][SerializeField] private float roadScaler = 1f;
+    [SerializeField] private Transform car;
+    [SerializeField] private float lapTime = 5f; 
+    private float timer = 0f;
+    [SerializeField] private bool drawOn = true;
 
-    float adjustedT => AdjustTValue(GetSegment());
+    float adjustedT => AdjustTValue(GetSegment(t), t);
 
     //road stuff
     [SerializeField] Mesh2D roadCrossSection;
@@ -21,15 +25,24 @@ public class BezierRoad : MonoBehaviour
     private int segments => closedPath ? points.Length : points.Length - 1;
     [SerializeField] bool closedPath = false;
 
-
-    private int GetSegment()
+    private void Update()
     {
-        return Mathf.FloorToInt(segments * t) < segments ? Mathf.FloorToInt(segments * t) : segments - 1;
+        timer += Time.deltaTime;
+        float tempT = timer / lapTime;
+        if (timer > lapTime) timer = 0f;
+        float carT = AdjustTValue(GetSegment(tempT), tempT);
+        car.position = GetBezierPoint(GetSegment(tempT), carT);
+        car.right = -1 * GetBezierForwardVector(GetSegment(tempT), carT);
     }
 
-    private float AdjustTValue(int _segment)
+    private int GetSegment(float _t)
     {
-        return (t - ((float)_segment / (float)segments)) / (1.0f / (float)segments);
+        return Mathf.FloorToInt(segments * _t) < segments ? Mathf.FloorToInt(segments * _t) : segments - 1;
+    }
+
+    private float AdjustTValue(int _segment, float _t)
+    {
+        return (_t - ((float)_segment / (float)segments)) / (1.0f / (float)segments);
     }
 
     private Vector3 GetBezierPoint(int _currentSegment, float _t)
@@ -105,12 +118,8 @@ public class BezierRoad : MonoBehaviour
         List<Vector2> uvs = new();
         List<int> triangles = new();
 
-        float debugT = -1;
-
         for (int i = 0; i <= drawnSegmentCount; i++)
         {
-            // int sectionsPerSegment = drawnSegmentCount / segments;
-            // if (!closedPath) sectionsPerSegment = drawnSegmentCount / segments + 1;
             int iterator;
             if (closedPath) iterator = i < drawnSegmentCount ? i : 0;
             else iterator = i;
@@ -123,15 +132,10 @@ public class BezierRoad : MonoBehaviour
             float v = (uvT - ((float)currentSegment / (float)segments)) / (1.0f / (float)segments);
             if (v > 1f) v = 1f;
             float scalar = 1 - (float)segments / (float)drawnSegmentCount;
-            if (currentSegment % 2 == 1) v = 1 - v;
             v *= scalar;
+            if (currentSegment % 2 == 1) v = 1 - v;
 
             Vector3 trackCenter = GetBezierPoint(currentSegment, adjustedT);
-            
-            if (i + 1 >= drawnSegmentCount)
-            {
-                Debug.Log($"uvT {v}");
-            }
 
             //get forward vector
             Vector3 _forwardVector = GetBezierForwardVector(currentSegment, adjustedT);
@@ -155,13 +159,13 @@ public class BezierRoad : MonoBehaviour
                 //actual corrected point
                 vert += trackCenter - transform.position;
 
+                if (drawOn)
                 Gizmos.DrawSphere(vert + transform.position, 0.2f);
 
                 vertices.Add(vert);
                 uvs.Add(new Vector2(roadCrossSection.vertices[j].u, v));
                 normals.Add((Vector3)roadCrossSection.vertices[j].normal * roadScaler + trackCenter);
             }
-            debugT = v;
         }
 
         int baseIndex;
@@ -240,6 +244,7 @@ public class BezierRoad : MonoBehaviour
         triangles.Add(upperRight);
         triangles.Add(lowerRight);
         ////////////////////////////////////////////////////////////////////
+        //final set of triangles ends
 
         roadMesh.SetVertices(vertices);
         roadMesh.SetNormals(normals);
@@ -255,6 +260,7 @@ public class BezierRoad : MonoBehaviour
         GenerateRoadMesh();
         roadMesh.name = "generated road mesh";
         GetComponent<MeshFilter>().sharedMesh = roadMesh;
+        if (!drawOn) return;
 
         for (int i = 0; i < segments; i++)
         {
@@ -272,10 +278,10 @@ public class BezierRoad : MonoBehaviour
         Gizmos.color = Color.blue;
         Gizmos.DrawSphere(curvePoint.position, 0.3f);
 
-        curvePoint.position = GetBezierPoint(GetSegment(), adjustedT);
+        curvePoint.position = GetBezierPoint(GetSegment(t), adjustedT);
 
         //get & draw forward vector
-        Vector3 forwardVector = GetBezierForwardVector(GetSegment(), adjustedT);
+        Vector3 forwardVector = GetBezierForwardVector(GetSegment(t), adjustedT);
         MyDraw.DrawVectorAt(curvePoint.position, forwardVector * 3.0f, Color.blue, 3.0f);
 
         //get & draw "right" vector
@@ -364,73 +370,5 @@ public class BezierRoad : MonoBehaviour
                 previousSegment[j] = pointToDraw;
             }
         }
-
-        // for (int i = 0; i < segments; i++)
-        // {
-        //     int sectionsPerSegment = drawnSegmentCount / segments;
-        //     Vector3?[] previousSegment = new Vector3?[roadCrossSection.vertices.Length];
-
-        //     for (int j = 0; j < previousSegment.Length; j++)
-        //     {
-        //         previousSegment[j] = null;
-        //     }
-
-        //     for (int j = 0; j <= sectionsPerSegment; j++)
-        //     {
-        //         float _t = (float)j / (float)sectionsPerSegment;
-        //         Vector3 trackCenter = GetBezierPoint(i, _t);
-
-        //         //get forward vector
-        //         Vector3 _forwardVector = GetBezierForwardVector(i, _t);
-
-        //         //get "right" vector
-        //         Vector3 _right = Vector3.Cross(Vector3.up, _forwardVector);
-
-        //         //get "real up" vector
-        //         Vector3 _realUp = Vector3.Cross(_forwardVector, _right);
-
-        //         //draw points using cross section
-        //         for (int k = 0; k < roadCrossSection.vertices.Length - 1; k++)
-        //         {
-        //             //these are this road crossection's points
-        //             Vector3 pointToDraw = roadCrossSection.vertices[k].point.x * _right +
-        //             roadCrossSection.vertices[k].point.y * _realUp;
-        //             Vector3 nextPointToDraw = roadCrossSection.vertices[k + 1].point.x * _right +
-        //             roadCrossSection.vertices[k + 1].point.y * _realUp;
-
-        //             //scale road crosssection
-        //             pointToDraw *= roadScaler;
-        //             nextPointToDraw *= roadScaler;
-
-        //             //these are for drawing this segment
-        //             pointToDraw += trackCenter;
-        //             nextPointToDraw += trackCenter;
-
-        //             //draw lines
-        //             Handles.DrawLine(pointToDraw, nextPointToDraw, 1.5f);
-        //             if (previousSegment[k] != null)
-        //             {
-        //                 Handles.DrawLine(pointToDraw, (Vector3)previousSegment[k], 1.5f);
-        //             }
-
-        //             //clumsy way of connecting the first and last pieces without using
-        //             //an additional Vector3 array to hold the points
-        //             if (k + 2 == roadCrossSection.vertices.Length)
-        //             {
-        //                 pointToDraw = roadCrossSection.vertices[^1].point.x * _right +
-        //                 roadCrossSection.vertices[^1].point.y * _realUp;
-        //                 nextPointToDraw = roadCrossSection.vertices[0].point.x * _right +
-        //                 roadCrossSection.vertices[0].point.y * _realUp;
-
-        //                 pointToDraw *= roadScaler;
-        //                 nextPointToDraw *= roadScaler;
-        //                 pointToDraw += trackCenter;
-        //                 nextPointToDraw += trackCenter;
-        //                 Handles.DrawLine(pointToDraw, nextPointToDraw, 1.5f);
-        //             }
-        //             previousSegment[k] = pointToDraw;
-        //         }
-        //     }
-        // }
     }
 }
