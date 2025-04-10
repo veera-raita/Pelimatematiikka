@@ -1,41 +1,32 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 public class Laser : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [Range(0, 16)][SerializeField] private int reflectionCount = 3;
 
     private void OnDrawGizmos()
     {
         Handles.color = Color.red;
-        Handles.DrawLine(transform.position, transform.position + transform.right * 5f, 3f);
-        RaycastHit hit;
-        bool didHit = Physics.Raycast(transform.position, transform.right, out hit);
-
-        if (!didHit) return;
-
         Gizmos.color = Color.red;
-        Gizmos.DrawSphere(hit.point, 0.3f);
 
-        Vector3 reflection = transform.right - 2 * Vector3.Dot(transform.right, hit.normal) * hit.normal;
-        // Vector3 reflection2 = Vector3.Reflect(transform.right, hit.normal);
-        Handles.DrawLine(hit.point, hit.point + reflection, 3f);
+        //declare variables used for calculating and drawing reflections
+        Vector3 prevPoint = transform.position;
+        Vector3 prevReflect = transform.right;
 
-        didHit = Physics.Raycast(hit.point, hit.normal, out hit);
-        if (!didHit) return;
-        // Gizmos.DrawSphere(hit.point, 0.3f);
-        // Handles.DrawLine(hit.point, hit.point + hit.normal * 5f, 3f);
+        for (int i = 0; i <= reflectionCount; i++)
+        {
+            //if no hit, break loop early. note inlined hit variable declaration
+            if (!Physics.Raycast(prevPoint, prevReflect, out RaycastHit hit)) break;
+            Vector3 reflection = Vector3.Reflect(prevReflect, hit.normal);
+
+            //draw reflection and hit point
+            Handles.DrawLine(prevPoint, hit.point, 3.0f);
+            Gizmos.DrawSphere(hit.point, 0.1f);
+            
+            //save previous variables, used for calcs and drawing again
+            prevPoint = hit.point;
+            prevReflect = reflection;
+        }
     }
 }
