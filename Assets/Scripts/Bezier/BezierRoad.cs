@@ -118,6 +118,8 @@ public class BezierRoad : MonoBehaviour
         List<Vector2> uvs = new();
         List<int> triangles = new();
 
+            Vector3 trackCenter, _forwardVector, _right, _realUp;
+
         for (int i = 0; i <= drawnSegmentCount; i++)
         {
             int iterator;
@@ -129,22 +131,21 @@ public class BezierRoad : MonoBehaviour
             int currentSegment = Mathf.FloorToInt(_t * segments);
             if (currentSegment > segments) currentSegment = segments;
             float adjustedT = (_t - ((float)currentSegment / (float)segments)) / (1.0f / (float)segments);
-            float v = (uvT - ((float)currentSegment / (float)segments)) / (1.0f / (float)segments);
-            if (v > 1f) v = 1f;
-            float scalar = 1 - (float)segments / (float)drawnSegmentCount;
-            v *= scalar;
-            if (currentSegment % 2 == 1) v = 1 - v;
 
-            Vector3 trackCenter = GetBezierPoint(currentSegment, adjustedT);
+            float v = uvT;
+
+            if (v > 0.5f) v = 1f - v;
+
+            trackCenter = GetBezierPoint(currentSegment, adjustedT);
 
             //get forward vector
-            Vector3 _forwardVector = GetBezierForwardVector(currentSegment, adjustedT);
+            _forwardVector = GetBezierForwardVector(currentSegment, adjustedT);
 
             //get "right" vector
-            Vector3 _right = Vector3.Cross(Vector3.up, _forwardVector);
+            _right = Vector3.Cross(Vector3.up, _forwardVector);
 
             //get "real up" vector
-            Vector3 _realUp = Vector3.Cross(_forwardVector, _right);
+            _realUp = Vector3.Cross(_forwardVector, _right);
 
             //draw points using cross section
             for (int j = 0; j < roadCrossSection.vertices.Length; j++)

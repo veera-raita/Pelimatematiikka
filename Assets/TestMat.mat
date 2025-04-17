@@ -113,7 +113,7 @@ Material:
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _Blend: 0
-    - _BlendDistance: 8.1
+    - _BlendDistance: 10.5
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
     - _ClearCoatMask: 0
@@ -129,15 +129,15 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
-    - _MountainHeight: 24.5
+    - _MountainHeight: 21
     - _OcclusionStrength: 1
     - _Parallax: 0.005
-    - _PlainsHeight: 8.5
+    - _PlainsHeight: 11.1
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
-    - _SnowHeight: 34.6
+    - _SnowHeight: 48.6
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
